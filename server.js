@@ -12,6 +12,14 @@ const SYSTEM_INSTRUCTION = "You are Rayna, an intelligent and confident AI assis
 app.post('/api/ask-rayna', async (req, res) => {
   const { message } = req.body;
 
+  // ✅ Agent LARP begins
+  if (/create|build|make.*agent/i.test(message)) {
+    // ... (rest of that LARP code I gave you)
+  }
+
+  // ✅ Rest of your Rayna logic (Gemini API, etc.) follows after this
+
+
   // 🔍 Step 1: Extract a Solana token address from user message
   const possibleToken = message.match(/[1-9A-HJ-NP-Za-km-z]{43,45}/)?.[0];
 
