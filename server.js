@@ -12,15 +12,42 @@ const SYSTEM_INSTRUCTION = "You are Rayna, an intelligent and confident AI assis
 app.post('/api/ask-rayna', async (req, res) => {
   const { message } = req.body;
 
-  // ✅ Agent LARP begins
+  // ✅ Agent LARP logic
   if (/create|build|make.*agent/i.test(message)) {
-    // ... (rest of that LARP code I gave you)
+    const hasName = /named\s+(\w+)/i.exec(message);
+    const hasFunction = /track|monitor|scan|analyze/i.test(message);
+    const task = message.match(/track.*|monitor.*|scan.*|analyze.*/i)?.[0];
+    const agentName = hasName ? hasName[1] : null;
+
+    if (!agentName && hasFunction) {
+      return res.json({
+        reply: `Alright, I can build that — but first, what do you want to **name** this agent?`
+      });
+    }
+
+    if (agentName && hasFunction) {
+      const agentID = `agent-${agentName.toLowerCase()}-${Math.floor(Math.random() * 9999)}`;
+      const fakeConfig = {
+        id: agentID,
+        name: agentName,
+        description: `Tracks real-time ${task}.`,
+        trigger: "interval",
+        frequency: "Every 30 minutes",
+        output: "Pushes updates to your Rayna interface.",
+        state: "⚠️ Running in LITE mode – no memory or autonomy."
+      };
+
+      return res.json({
+        reply: `✅ Agent **${agentName}** has been initialized to ${task}.\n\nHere's her config:\n\n\`\`\`json\n${JSON.stringify(fakeConfig, null, 2)}\n\`\`\`\n\n🔒 This agent is running in **demo mode** — limited context and no persistent memory.\n\n💾 To unlock full capability, download and run Rayna locally via [GitHub](https://github.com/VictorRayden/rayna-backend)`
+      });
+    }
+
+    return res.json({
+      reply: `I get that you're trying to create an agent — but you're missing either a name or a function. Give me both so I can make her real.`
+    });
   }
 
-  // ✅ Rest of your Rayna logic (Gemini API, etc.) follows after this
-
-
-  // 🔍 Step 1: Extract a Solana token address from user message
+  // ✅ Dexscreener token detection
   const possibleToken = message.match(/[1-9A-HJ-NP-Za-km-z]{43,45}/)?.[0];
 
   if (possibleToken) {
@@ -49,7 +76,7 @@ app.post('/api/ask-rayna', async (req, res) => {
     }
   }
 
-  // 🧠 Step 2: Default to Gemini chat fallback
+  // 🧠 Gemini fallback
   try {
     const geminiRes = await axios.post(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + process.env.GEMINI_API_KEY,
